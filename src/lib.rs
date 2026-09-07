@@ -36,6 +36,8 @@ pub fn manifest_for(name: &str, data_sent: &[&str]) -> PluginManifest {
             "audio_bytes".to_string(),
             "cover_bytes".to_string(),
         ],
+        // AI/在线插件属 L1/L2 低风险：无需 ACK 闸（P6b：格式迁移类才需要）
+        ack_required: false,
     }
 }
 

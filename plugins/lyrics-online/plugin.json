@@ -9,6 +9,7 @@
     "duration_ms",
     "lyrics_excerpt"
   ],
+  "ack_required": false,
   "data_not_sent": [
     "absolute_path",
     "audio_bytes",
