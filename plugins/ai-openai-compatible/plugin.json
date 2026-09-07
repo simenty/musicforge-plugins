@@ -1,0 +1,21 @@
+{
+  "name": "ai-openai-compatible",
+  "api_version": "1.0.0",
+  "kind": "ai",
+  "network": true,
+  "data_sent": [
+    "normalized_filename",
+    "title",
+    "artists",
+    "album",
+    "duration_ms",
+    "format",
+    "language_hint",
+    "lyrics_excerpt"
+  ],
+  "data_not_sent": [
+    "absolute_path",
+    "audio_bytes",
+    "cover_bytes"
+  ]
+}

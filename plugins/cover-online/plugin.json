@@ -1,0 +1,17 @@
+{
+  "name": "cover-online",
+  "api_version": "1.0.0",
+  "kind": "ai",
+  "network": true,
+  "data_sent": [
+    "title",
+    "artists",
+    "album",
+    "duration_ms"
+  ],
+  "data_not_sent": [
+    "absolute_path",
+    "audio_bytes",
+    "cover_bytes"
+  ]
+}
