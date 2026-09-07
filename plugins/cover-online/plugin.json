@@ -10,6 +10,7 @@
     "duration_ms"
   ],
   "ack_required": false,
+  "extensions": [],
   "data_not_sent": [
     "absolute_path",
     "audio_bytes",
