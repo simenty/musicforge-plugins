@@ -40,6 +40,17 @@ pub fn manifest_for(name: &str, data_sent: &[&str]) -> PluginManifest {
         ack_required: false,
         // AI/在线插件不做格式迁移：无能力声明
         extensions: vec![],
+        // P6a-R（协议 v0.1 §7）：与 plugin.json 声明一致——联网（插件进程内）+
+        // 读元数据 + 写标签建议；三禁位恒 false
+        permissions: musicforge_plugin_api::PluginPermissions {
+            network: true,
+            read_audio_metadata: true,
+            read_audio_file: false,
+            write_tags: true,
+            delete_source_file: false,
+            move_source_file: false,
+            upload_audio: false,
+        },
     }
 }
 
@@ -57,10 +68,26 @@ pub fn serve(name: &str, data_sent: &[&str], handler: Handler) {
         if line.trim().is_empty() {
             continue;
         }
+        // P6a-R（P2）：16MB 单行上限——超限显式拒绝（协议违规语义）
+        if line.len() > musicforge_plugin_api::v1::MAX_MESSAGE_BYTES {
+            let resp = Response::err("unknown", "MF-PLUGIN-BAD-REQUEST", "消息超过 16MB 上限");
+            let _ = writeln!(out, "{}", serde_json::to_string(&resp).unwrap());
+            let _ = out.flush();
+            continue;
+        }
         let resp = match serde_json::from_str::<Request>(line.trim()) {
             Err(_) => Response::err("unknown", "MF-PLUGIN-MANIFEST-INVALID", "请求行无法解析"),
             Ok(req) => {
                 let resp = match req.method.as_str() {
+                    // P6a-R（X39）：握手拦截（框架级统一——AI 插件免费获得 v0.1 能力）
+                    methods::PLUGIN_INIT => Response::ok(
+                        &req.id,
+                        serde_json::to_value(&musicforge_plugin_api::InitResult {
+                            api_version: "1.0.0".into(),
+                            manifest: Some(manifest.clone()),
+                        })
+                        .unwrap(),
+                    ),
                     methods::PLUGIN_MANIFEST => {
                         Response::ok(&req.id, serde_json::to_value(&manifest).unwrap())
                     }
