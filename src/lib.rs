@@ -123,6 +123,12 @@ pub fn http_get_json(url: &str) -> Result<serde_json::Value, String> {
     serde_json::from_str(&text).map_err(|e| format!("响应 JSON 解析失败: {e}"))
 }
 
+/// UTF-8 安全截断（稳定审计 B7：按字节切片在多字节字符中间会 panic
+/// → 插件进程崩溃；LLM 网关错误体常含 CJK，必须按字符边界截断）。
+fn utf8_truncate(s: &str, max_chars: usize) -> String {
+    s.chars().take(max_chars).collect()
+}
+
 /// POST JSON（Bearer 认证；非 2xx → Err 并附响应体摘要）。
 pub fn http_post_json(
     url: &str,
@@ -138,7 +144,7 @@ pub fn http_post_json(
             let detail = match e {
                 ureq::Error::Status(code, resp) => {
                     let body = resp.into_string().unwrap_or_default();
-                    format!("HTTP {code}: {}", &body[..body.len().min(300)])
+                    format!("HTTP {code}: {}", utf8_truncate(&body, 150))
                 }
                 other => format!("{other}"),
             };

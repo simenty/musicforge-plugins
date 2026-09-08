@@ -95,6 +95,12 @@ pub fn clamp01_for_test(v: f64) -> f32 {
     clamp01(v)
 }
 
+/// 测试可见性包装（#[doc(hidden)]：非公开 API 承诺）。
+#[doc(hidden)]
+pub fn utf8_truncate_for_test(s: &str, max_chars: usize) -> String {
+    crate::utf8_truncate(s, max_chars)
+}
+
 /// `ai.identify_track`：文件名 + 已有标签上下文 → 元数据识别 Suggestion。
 pub fn identify_track(params: &serde_json::Value) -> Result<IdentifySuggestion, (String, String)> {
     let p: musicforge_plugin_api::IdentifyTrackParams = serde_json::from_value(params.clone())

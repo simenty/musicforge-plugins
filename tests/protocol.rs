@@ -4,6 +4,17 @@
 use musicforge_plugin_api::LyricsVerdict;
 use musicforge_plugins::{ai_openai, cover_itunes, lyrics_lrclib, manifest_for};
 
+/// 稳定审计 B7 回归：错误摘要截断必须 UTF-8 安全（CJK 多字节中间不得 panic）。
+#[test]
+fn utf8_truncate_is_char_boundary_safe() {
+    let cjk = "错误：余额不足，请充值后重试，账户名不存在或密码错误，验证码已过期，请求过于频繁。";
+    let t = ai_openai::utf8_truncate_for_test(cjk, 10);
+    assert!(t.chars().count() <= 10);
+    assert!(!t.contains('\u{FFFD}'), "不得产生替换字符（UTF-8 边界破坏证据）");
+    assert_eq!(ai_openai::utf8_truncate_for_test("", 10), "");
+    assert_eq!(ai_openai::utf8_truncate_for_test("abc", 10), "abc");
+}
+
 // ---------------------------------------------------------------- 清单 --
 
 #[test]
